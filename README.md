@@ -42,6 +42,10 @@ email-mcp
 
 프로젝트 루트에 `.vscode/mcp.json` 파일을 생성합니다.
 
+### 방법 A: .env 파일 사용
+
+프로젝트 루트에 `.env` 파일이 있으면 MCP 서버가 자동으로 로드합니다.
+
 **Linux:**
 ```json
 {
@@ -65,6 +69,46 @@ email-mcp
   }
 }
 ```
+
+### 방법 B: mcp.json에서 환경변수 직접 전달
+
+`.env` 파일 없이 `mcp.json`의 `env` 필드로 직접 설정할 수 있습니다.
+
+**Linux:**
+```json
+{
+  "servers": {
+    "email-mcp": {
+      "type": "stdio",
+      "command": "${workspaceFolder}/.venv/bin/email-mcp",
+      "env": {
+        "API_BASE_URL": "https://app.mwm.local:20443",
+        "API_BEARER_TOKEN": "your_jwt_token_here",
+        "API_SSL_VERIFY": "false"
+      }
+    }
+  }
+}
+```
+
+**Windows:**
+```json
+{
+  "servers": {
+    "email-mcp": {
+      "type": "stdio",
+      "command": "C:\\projects\\email-mcp-server\\.venv\\Scripts\\email-mcp.exe",
+      "env": {
+        "API_BASE_URL": "https://app.mwm.local:20443",
+        "API_BEARER_TOKEN": "your_jwt_token_here",
+        "API_SSL_VERIFY": "false"
+      }
+    }
+  }
+}
+```
+
+> **참고**: `env`에 설정한 값이 `.env` 파일보다 우선합니다. 두 방법을 혼용할 수도 있습니다.
 
 ## MCP 도구 상세
 

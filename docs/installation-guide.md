@@ -229,11 +229,15 @@ VS Code에서 `Ctrl+Shift+P` → **Extensions: Install from VSIX...** 선택 →
 
 ### 6-2. MCP 서버 설정
 
-VS Code 설정 파일에 MCP 서버를 등록한다.
+VS Code에서 MCP 서버를 등록하는 방법은 두 가지이다.  
+환경변수를 설정하는 방식에 따라 택일한다.
 
-**방법 A: 프로젝트 단위 설정 (권장)**
+---
 
-프로젝트 루트에 `.vscode/mcp.json` 파일을 생성한다:
+#### 방법 A: `.env` 파일 사용
+
+프로젝트 루트에 `.env` 파일이 있으면 MCP 서버가 자동으로 로드한다.  
+`.vscode/mcp.json`에는 command만 지정하면 된다.
 
 **Windows:**
 
@@ -261,9 +265,58 @@ VS Code 설정 파일에 MCP 서버를 등록한다.
 }
 ```
 
-**방법 B: 사용자 전역 설정**
+> `.env` 파일 생성 방법은 [5. 환경변수 설정](#5-환경변수-설정) 참조.
 
-VS Code `settings.json` (`Ctrl+Shift+P` → **Preferences: Open User Settings (JSON)**):
+---
+
+#### 방법 B: `mcp.json`의 `env` 필드에서 직접 설정 (권장)
+
+`.env` 파일 없이 `mcp.json`에서 환경변수를 직접 전달할 수 있다.  
+**다른 프로젝트의 VS Code에서 이 MCP 서버를 사용할 때 특히 유용하다.**
+
+**Windows:**
+
+```json
+{
+  "servers": {
+    "email-mcp": {
+      "type": "stdio",
+      "command": "C:\\projects\\email-mcp-server\\.venv\\Scripts\\email-mcp.exe",
+      "env": {
+        "API_BASE_URL": "https://app.mwm.local:20443",
+        "API_BEARER_TOKEN": "your_jwt_token_here",
+        "API_SSL_VERIFY": "false"
+      }
+    }
+  }
+}
+```
+
+**Linux:**
+
+```json
+{
+  "servers": {
+    "email-mcp": {
+      "type": "stdio",
+      "command": "/home/사용자명/projects/email-mcp-server/.venv/bin/email-mcp",
+      "env": {
+        "API_BASE_URL": "https://app.mwm.local:20443",
+        "API_BEARER_TOKEN": "your_jwt_token_here",
+        "API_SSL_VERIFY": "false"
+      }
+    }
+  }
+}
+```
+
+> **참고**: `env`에 설정한 값이 `.env` 파일보다 우선한다. 두 방법을 혼용할 수도 있다.
+
+---
+
+#### 방법 C: 사용자 전역 설정 (모든 프로젝트에서 사용)
+
+VS Code `settings.json` (`Ctrl+Shift+P` → **Preferences: Open User Settings (JSON)**)에 등록하면 모든 프로젝트에서 사용할 수 있다.
 
 **Windows:**
 
@@ -273,7 +326,12 @@ VS Code `settings.json` (`Ctrl+Shift+P` → **Preferences: Open User Settings (J
     "servers": {
       "email-mcp": {
         "type": "stdio",
-        "command": "C:\\projects\\email-mcp-server\\.venv\\Scripts\\email-mcp.exe"
+        "command": "C:\\projects\\email-mcp-server\\.venv\\Scripts\\email-mcp.exe",
+        "env": {
+          "API_BASE_URL": "https://app.mwm.local:20443",
+          "API_BEARER_TOKEN": "your_jwt_token_here",
+          "API_SSL_VERIFY": "false"
+        }
       }
     }
   }
@@ -288,28 +346,12 @@ VS Code `settings.json` (`Ctrl+Shift+P` → **Preferences: Open User Settings (J
     "servers": {
       "email-mcp": {
         "type": "stdio",
-        "command": "/home/사용자명/projects/email-mcp-server/.venv/bin/email-mcp"
-      }
-    }
-  }
-}
-```
-
-### 6-3. 환경변수를 VS Code에서 전달하는 방법 (선택)
-
-`.env` 파일이 프로젝트 루트에 있으면 MCP 서버가 자동으로 로드한다.
-만약 다른 경로에 `.env`가 있거나 환경변수를 직접 전달하려면:
-
-```json
-{
-  "servers": {
-    "email-mcp": {
-      "type": "stdio",
-      "command": "C:\\projects\\email-mcp-server\\.venv\\Scripts\\email-mcp.exe",
-      "env": {
-        "API_BASE_URL": "https://app.mwm.local:20443",
-        "API_BEARER_TOKEN": "your_token_here",
-        "API_SSL_VERIFY": "false"
+        "command": "/home/사용자명/projects/email-mcp-server/.venv/bin/email-mcp",
+        "env": {
+          "API_BASE_URL": "https://app.mwm.local:20443",
+          "API_BEARER_TOKEN": "your_jwt_token_here",
+          "API_SSL_VERIFY": "false"
+        }
       }
     }
   }
