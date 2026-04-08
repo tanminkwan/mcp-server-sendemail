@@ -6,7 +6,7 @@ from typing import Any
 
 import httpx
 
-from email_mcp.config import Settings
+from email_mcp.config import DEFAULT_SENDER_NAME, Settings
 
 
 class EmailClient:
@@ -69,7 +69,6 @@ class EmailClient:
             "receivers": receivers,
             "subject": subject,
             "content": content,
+            "sender_name": sender_name or DEFAULT_SENDER_NAME,
         }
-        if sender_name is not None:
-            payload["sender_name"] = sender_name
         return payload

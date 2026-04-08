@@ -16,6 +16,9 @@ DEFAULT_SSL_VERIFY = False
 # HTTP 요청 타임아웃 (초)
 DEFAULT_TIMEOUT = 60
 
+# 발신인 기본 표시 이름
+DEFAULT_SENDER_NAME = "MCP Email"
+
 
 class Settings:
     """EmailApi 접속에 필요한 설정을 환경변수에서 로드한다."""

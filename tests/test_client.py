@@ -7,7 +7,7 @@ import pytest
 import respx
 
 from email_mcp.client import EmailClient
-from email_mcp.config import Settings
+from email_mcp.config import DEFAULT_SENDER_NAME, Settings
 
 
 @pytest.fixture(autouse=True)
@@ -90,7 +90,7 @@ class TestEmailClient:
         body = route.calls.last.request.read()
         import json
         payload = json.loads(body)
-        assert "sender_name" not in payload
+        assert payload["sender_name"] == DEFAULT_SENDER_NAME
 
     @respx.mock
     async def test_send_html_400_raises(self, client, settings):
