@@ -11,7 +11,7 @@ from extract_error_log_mcp.client import ExtractLogClient
 from extract_error_log_mcp.config import Settings
 
 SERVER_NAME = "extract-error-log-mcp"
-SERVER_INSTRUCTIONS = "로그 추출 요청 및 추출된 마크다운 결과를 조회하는 MCP 서버입니다."
+SERVER_INSTRUCTIONS = "서버 에러(error) 로그 추출 요청 및 추출된 마크다운 결과를 조회하는 MCP 서버입니다. '서버 ooo에서 error를 찾아줘' 와 같은 요청에 사용하세요."
 
 
 def create_client() -> ExtractLogClient:
@@ -32,12 +32,13 @@ def create_server() -> MCPServer:
         time_to: str,
         was_instance_id: str,
     ) -> str:
-        """로그 추출을 요청하고 command_id를 반환합니다.
+        """서버의 '에러(error) 로그' 추출을 요청하고 command_id를 반환합니다.
+        '서버 ooo에서 error를 찾아' 또는 '에러 로그를 확인해줘'와 같은 요청에 이 도구를 사용하세요.
         AI Agent는 이 도구를 호출하여 command_id를 얻은 후, 약 1분간 대기(wait)하고 나서 get_extracted_log 도구를 호출해야 합니다.
 
         Args:
             date: 로그 추출 대상 일자 (포맷: yyyymmdd, 8자리 숫자)
-            host_id: 호스트 ID
+            host_id: 호스트 ID ('서버'라고도 부름)
             time_from: 검색 시작 시간 (포맷: hhmiss, 6자리 숫자, time_to 보다 이전이어야 함)
             time_to: 검색 종료 시간 (포맷: hhmiss, 6자리 숫자)
             was_instance_id: WAS 인스턴스 ID (반드시 '_MS' 문자열을 포함해야 함)
