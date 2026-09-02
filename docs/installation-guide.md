@@ -38,8 +38,17 @@ https://www.python.org/downloads/
 
 ### 1-2. Python 패키지 오프라인 번들 생성
 
-인터넷이 되는 PC에 동일한 Python 버전을 설치한 후, wheel 파일을 다운로드한다.
+인터넷이 되는 PC에서 대상 OS(배포 환경)에 맞는 wheel 파일을 다운로드한다.
 
+**배포 환경이 Windows인 경우 (크로스 플랫폼 다운로드):**
+Linux 등 다른 OS에서 Windows 배포용 패키지를 다운로드하려면 `--platform` 옵션을 명시해야 한다.
+```bash
+# 프로젝트 디렉토리에서 실행
+pip download --platform win_amd64 --python-version 3.14 --only-binary=:all: -d ./offline-packages-win .
+pip download --platform win_amd64 --python-version 3.14 --only-binary=:all: -d ./offline-packages-win ".[dev]"
+```
+
+**배포 환경이 현재 OS와 동일한 경우:**
 ```bash
 # 프로젝트 디렉토리에서 실행
 pip download -d ./offline-packages .
@@ -53,7 +62,7 @@ pip freeze > requirements-freeze.txt
 pip download -d ./offline-packages -r requirements-freeze.txt
 ```
 
-`offline-packages/` 디렉토리에 `.whl` 파일들이 저장된다.
+지정한 디렉토리(`offline-packages-win/` 또는 `offline-packages/`)에 타겟 OS용 `.whl` 파일들이 저장된다.
 
 ### 1-3. VS Code 확장 다운로드
 
@@ -75,7 +84,7 @@ email-mcp-server/            ← 프로젝트 전체 (이 저장소)
 ├── pyproject.toml
 ├── .env.example
 ├── ...
-├── offline-packages/         ← pip download로 생성한 wheel 파일들
+├── offline-packages-win/     ← pip download로 생성한 Windows 배포용 wheel 파일들 (또는 offline-packages/)
 python-3.14.x-amd64.exe      ← Python 설치파일
 claude-code-x.x.x.vsix       ← VS Code 확장 파일
 ```
@@ -159,7 +168,11 @@ source .venv/bin/activate
 ### 4-2. 오프라인 패키지 설치
 
 ```bash
-pip install --no-index --find-links=./offline-packages -e .
+# Windows 배포용 패키지를 다운로드한 경우
+pip install --no-index --find-links=./offline-packages-win -e .
+
+# 배포 환경과 동일한 OS에서 다운로드한 경우
+# pip install --no-index --find-links=./offline-packages -e .
 ```
 
 설치 확인:
@@ -456,7 +469,7 @@ WARNING: Retrying ... after connection broken
 → 오프라인 설치 명령어를 사용한다:
 
 ```bash
-pip install --no-index --find-links=./offline-packages -e .
+pip install --no-index --find-links=./offline-packages-win -e .
 ```
 
 ### MCP 서버가 VS Code에서 연결되지 않음
@@ -519,5 +532,5 @@ email-mcp-server/
 ├── scripts/
 │   └── send_test_email.py   ← 발송 테스트 스크립트
 ├── docs/                    ← 문서
-└── offline-packages/        ← 오프라인 설치용 wheel 파일 (선택)
+└── offline-packages-win/    ← 오프라인 설치용 Windows wheel 파일 (선택)
 ```

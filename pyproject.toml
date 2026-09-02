@@ -3,9 +3,9 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "email-mcp"
+name = "mcp-server-collection"
 version = "0.1.0"
-description = "MCP server for sending emails via EmailApi"
+description = "Collection of MCP servers including Email and Extract Error Log"
 requires-python = ">=3.11"
 dependencies = [
     "mcp>=1.0.0",
@@ -23,6 +23,7 @@ dev = [
 
 [project.scripts]
 email-mcp = "email_mcp.server:main"
+extract-error-log-mcp = "extract_error_log_mcp.server:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

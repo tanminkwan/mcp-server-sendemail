@@ -11,3 +11,5 @@ dist/
 .vscode/
 .claude/
 offline-packages/
+offline-packages-win/
+tmp/

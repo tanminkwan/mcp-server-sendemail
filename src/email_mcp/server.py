@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 
 from email_mcp.client import EmailClient
 from email_mcp.config import Settings
@@ -18,9 +18,9 @@ def create_email_client() -> EmailClient:
     return EmailClient(Settings())
 
 
-def create_server() -> FastMCP:
-    """FastMCP 서버를 생성하고 이메일 도구를 등록한다."""
-    mcp = FastMCP(name=SERVER_NAME, instructions=SERVER_INSTRUCTIONS)
+def create_server() -> MCPServer:
+    """MCPServer 서버를 생성하고 이메일 도구를 등록한다."""
+    mcp = MCPServer(name=SERVER_NAME, instructions=SERVER_INSTRUCTIONS)
     email_client = create_email_client()
 
     @mcp.tool()
