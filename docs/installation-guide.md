@@ -551,6 +551,8 @@ Mermaid 다이어그램, 코드 블록, 표 등이 자동 변환된다.
 | `error_summary` | string | O | 오류 내용 요약 (300자 이내) | `"DB 커넥션 풀 고갈로 응답 지연 발생"` |
 | `error_keyword` | list[string] | O | 핵심 식별 키워드 목록 (최대 3개) | `["ORA-00001", "CONN_POOL_EXHAUSTED"]` |
 | `error_occurred_at` | string | O | 오류 발생일시 | `"2026-09-03 10:00:00"` |
+| `host_id` | string | O | 오류가 발생한 호스트 ID ('서버'/'시스템'이라고도 부름) | `"pcbkaa11"` |
+| `was_instance_id` | string | O | 오류가 발생한 WAS 인스턴스 ID (보통 `_MS` 포함) | `"ONL_MS12"` |
 | `error_content` | string | O | 오류 내용 (상세) | `"DB 커넥션 풀 고갈"` |
 | `action_taken_at` | string | O | 조치일시 | `"2026-09-03 10:30:00"` |
 | `actor` | string | O | 조치자 | `"김철수"` |

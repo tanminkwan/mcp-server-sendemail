@@ -10,6 +10,7 @@ from mcp.server.mcpserver import MCPServer
 from error_rag_mcp.client import RagClient
 from error_rag_mcp.config import (
     CONTENT_COMPOSE_TEMPLATE,
+    LOCATION_COMPOSE_TEMPLATE,
     MAX_ERROR_KEYWORD_COUNT,
     MAX_ERROR_SUMMARY_LENGTH,
     REPORT_TEMPLATE,
@@ -42,8 +43,16 @@ def _compose_content(error_summary: str, error_keyword: list[str]) -> str:
     return CONTENT_COMPOSE_TEMPLATE.format(error_summary=error_summary, keywords=keywords)
 
 
+def _compose_location(host_id: str, was_instance_id: str) -> str:
+    """host_id와 was_instance_id를 연결해 오류 발생 위치 문자열을 생성한다."""
+    return LOCATION_COMPOSE_TEMPLATE.format(
+        host_id=host_id, was_instance_id=was_instance_id
+    )
+
+
 def _compose_report(
     error_occurred_at: str,
+    error_location: str,
     error_content: str,
     action_taken_at: str,
     actor: str,
@@ -52,6 +61,7 @@ def _compose_report(
     """표준 오류 및 조치 보고서 양식(extended_content)을 생성한다."""
     return REPORT_TEMPLATE.format(
         error_occurred_at=error_occurred_at,
+        error_location=error_location,
         error_content=error_content,
         action_taken_at=action_taken_at,
         actor=actor,
@@ -117,6 +127,8 @@ def create_server() -> MCPServer:
         error_summary: str,
         error_keyword: list[str],
         error_occurred_at: str,
+        host_id: str,
+        was_instance_id: str,
         error_content: str,
         action_taken_at: str,
         actor: str,
@@ -133,6 +145,14 @@ def create_server() -> MCPServer:
                 사례가 다음 검색에서도 재현되어 지식이 누적됩니다. 텍스트 매칭 검색으로 이 사례를
                 찾을 수 있도록 content에 결합되어 저장됩니다.
             error_occurred_at: 오류 발생일시
+            host_id: 오류가 발생한 호스트 ID. '서버' 또는 '시스템'이라고도 부릅니다. 이 도구를
+                호출하는 AI Agent가 오류를 탐지·분석하는 과정에서 이미 파악하고 있는 값을 그대로
+                전달하세요(예: extract_error_log_mcp로 로그를 조회할 때 사용한 host_id와 동일한
+                값). 확인할 수 없다면 빈 문자열로 두지 말고 알고 있는 범위에서 최대한 구체적으로
+                전달하세요.
+            was_instance_id: 오류가 발생한 WAS 인스턴스 ID. 보통 문자열 안에 '_MS'를 포함합니다
+                (예: 'ONL_MS12'). 'OOO 서버의 XXX'처럼 표현되는 경우 XXX가 WAS 인스턴스 ID입니다.
+                host_id와 마찬가지로 AI Agent가 이미 파악하고 있는 값을 그대로 전달하세요.
             error_content: 오류 내용 (상세)
             action_taken_at: 조치일시
             actor: 조치자
@@ -154,8 +174,12 @@ def create_server() -> MCPServer:
                 )
 
             content = _compose_content(error_summary, error_keyword)
+            error_location = _compose_location(
+                host_id=host_id, was_instance_id=was_instance_id
+            )
             extended_content = _compose_report(
                 error_occurred_at=error_occurred_at,
+                error_location=error_location,
                 error_content=error_content,
                 action_taken_at=action_taken_at,
                 actor=actor,

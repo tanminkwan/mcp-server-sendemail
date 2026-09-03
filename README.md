@@ -217,13 +217,16 @@ Markdown 본문을 HTML로 자동 변환하여 발송합니다. 헤더, 목록, 
 | `error_summary` | string | O | 오류 내용 요약 (300자 이내) |
 | `error_keyword` | list[string] | O | 오류 코드 등 핵심 식별 키워드 목록 (최대 3개, 1개 이상) |
 | `error_occurred_at` | string | O | 오류 발생일시 |
+| `host_id` | string | O | 오류가 발생한 호스트 ID ('서버'/'시스템'이라고도 부름, `extract_error_log_mcp`의 `host_id`와 동일한 의미) |
+| `was_instance_id` | string | O | 오류가 발생한 WAS 인스턴스 ID (보통 `_MS` 포함, `extract_error_log_mcp`의 `was_instance_id`와 동일한 의미) |
 | `error_content` | string | O | 오류 내용 (상세) |
 | `action_taken_at` | string | O | 조치일시 |
 | `actor` | string | O | 조치자 |
 | `action_content` | string | O | 조치 내용 |
 
 > `content`(검색 대상)는 `error_summary`와 `error_keyword`를 서버가 결합해 생성하고,
-> `extended_content`(보고서 본문)는 나머지 5개 필드로 표준 양식을 생성합니다. 자세한 설계 근거는
+> `extended_content`(보고서 본문)는 나머지 6개 필드로 표준 양식을 생성합니다(`host_id`와
+> `was_instance_id`는 결합되어 "오류 발생 위치" 한 항목이 됩니다). 자세한 설계 근거는
 > [요구사항 정의서](docs/error_rag_mcp_requirements.md)를 참조하세요.
 
 ## 프로젝트 구조

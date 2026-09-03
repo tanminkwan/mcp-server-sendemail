@@ -168,6 +168,8 @@ class TestRegisterErrorResolutionTool:
             error_summary="DB 커넥션 풀 고갈로 응답 지연 발생",
             error_keyword=["ORA-00001", "CONN_POOL_EXHAUSTED"],
             error_occurred_at="2026-09-03 10:00:00",
+            host_id="pcbkaa11",
+            was_instance_id="ONL_MS12",
             error_content="DB 커넥션 풀 고갈",
             action_taken_at="2026-09-03 10:30:00",
             actor="김철수",
@@ -182,11 +184,23 @@ class TestRegisterErrorResolutionTool:
         assert payload["extended_content"] == (
             "# 오류 및 조치 보고서\n"
             "\n"
-            "- 오류 발생일시: 2026-09-03 10:00:00\n"
-            "- 오류 내용: DB 커넥션 풀 고갈\n"
-            "- 조치일시: 2026-09-03 10:30:00\n"
-            "- 조치자: 김철수\n"
-            "- 조치 내용: 커넥션 풀 크기 확장"
+            "### 1. 오류 발생일시\n"
+            "2026-09-03 10:00:00\n"
+            "\n"
+            "### 2. 오류 발생 위치\n"
+            "pcbkaa11 / ONL_MS12\n"
+            "\n"
+            "### 3. 오류 내용\n"
+            "DB 커넥션 풀 고갈\n"
+            "\n"
+            "### 4. 조치일시\n"
+            "2026-09-03 10:30:00\n"
+            "\n"
+            "### 5. 조치자\n"
+            "김철수\n"
+            "\n"
+            "### 6. 조치 내용\n"
+            "커넥션 풀 크기 확장"
         )
         assert payload["source"] == "error-resolution-report"
 
@@ -197,6 +211,8 @@ class TestRegisterErrorResolutionTool:
             error_summary="가" * 301,
             error_keyword=["ORA-00001"],
             error_occurred_at="2026-09-03 10:00:00",
+            host_id="pcbkaa11",
+            was_instance_id="ONL_MS12",
             error_content="상세",
             action_taken_at="2026-09-03 10:30:00",
             actor="김철수",
@@ -212,6 +228,8 @@ class TestRegisterErrorResolutionTool:
             error_summary="요약",
             error_keyword=[],
             error_occurred_at="2026-09-03 10:00:00",
+            host_id="pcbkaa11",
+            was_instance_id="ONL_MS12",
             error_content="상세",
             action_taken_at="2026-09-03 10:30:00",
             actor="김철수",
@@ -227,6 +245,8 @@ class TestRegisterErrorResolutionTool:
             error_summary="요약",
             error_keyword=["A", "B", "C", "D"],
             error_occurred_at="2026-09-03 10:00:00",
+            host_id="pcbkaa11",
+            was_instance_id="ONL_MS12",
             error_content="상세",
             action_taken_at="2026-09-03 10:30:00",
             actor="김철수",
@@ -242,6 +262,8 @@ class TestRegisterErrorResolutionTool:
             error_summary="요약",
             error_keyword=["ORA-00001", "  "],
             error_occurred_at="2026-09-03 10:00:00",
+            host_id="pcbkaa11",
+            was_instance_id="ONL_MS12",
             error_content="상세",
             action_taken_at="2026-09-03 10:30:00",
             actor="김철수",
@@ -260,6 +282,8 @@ class TestRegisterErrorResolutionTool:
             error_summary="요약",
             error_keyword=["ORA-00001"],
             error_occurred_at="2026-09-03 10:00:00",
+            host_id="pcbkaa11",
+            was_instance_id="ONL_MS12",
             error_content="상세",
             action_taken_at="2026-09-03 10:30:00",
             actor="김철수",

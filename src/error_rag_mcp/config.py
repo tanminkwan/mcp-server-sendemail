@@ -39,15 +39,33 @@ MAX_ERROR_KEYWORD_COUNT = 3
 CONTENT_COMPOSE_TEMPLATE = "{error_summary} [{keywords}]"
 
 # 오류 및 조치 보고서 표준 양식 (extended_content)
+# 각 필드를 "### N. 필드명" 대목차로 분리한다 — 조치 내용 등에 마크다운이 포함되어 있어도
+# bullet 한 줄에 값이 이어 붙는 형태(- 필드명: 값)가 아니므로 문서 구조가 깨지지 않는다.
 REPORT_TEMPLATE = (
     "# 오류 및 조치 보고서\n"
     "\n"
-    "- 오류 발생일시: {error_occurred_at}\n"
-    "- 오류 내용: {error_content}\n"
-    "- 조치일시: {action_taken_at}\n"
-    "- 조치자: {actor}\n"
-    "- 조치 내용: {action_content}"
+    "### 1. 오류 발생일시\n"
+    "{error_occurred_at}\n"
+    "\n"
+    "### 2. 오류 발생 위치\n"
+    "{error_location}\n"
+    "\n"
+    "### 3. 오류 내용\n"
+    "{error_content}\n"
+    "\n"
+    "### 4. 조치일시\n"
+    "{action_taken_at}\n"
+    "\n"
+    "### 5. 조치자\n"
+    "{actor}\n"
+    "\n"
+    "### 6. 조치 내용\n"
+    "{action_content}"
 )
+
+# 오류 발생 위치(extended_content 2번 항목) 결합 템플릿 — host_id와 was_instance_id를 연결해
+# 하나의 위치 표시 문자열로 만든다.
+LOCATION_COMPOSE_TEMPLATE = "{host_id} / {was_instance_id}"
 
 
 class Settings:

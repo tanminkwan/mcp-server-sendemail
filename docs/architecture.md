@@ -131,8 +131,9 @@ src/error_rag_mcp/
   `RAG_API_TIMEOUT`, `RAG_VECTOR_SEARCH_LIMIT`(기본 3), `RAG_TEXT_MATCHING_LIMIT`(기본 2),
   `RAG_SOURCE`(기본 `error-resolution-report`)
 - 도메인 상수(환경변수가 아닌 `config.py` 상수로 관리): `MAX_ERROR_SUMMARY_LENGTH=300`,
-  `MAX_ERROR_KEYWORD_COUNT=3`, `CONTENT_COMPOSE_TEMPLATE`, `REPORT_TEMPLATE`(오류 및 조치
-  보고서 표준 양식)
+  `MAX_ERROR_KEYWORD_COUNT=3`, `CONTENT_COMPOSE_TEMPLATE`, `LOCATION_COMPOSE_TEMPLATE`(오류
+  발생 위치 = `host_id` + `was_instance_id` 결합), `REPORT_TEMPLATE`(오류 및 조치 보고서
+  표준 양식)
 
 #### client.py — RagClient
 - 검색/등록 각각 단일 HTTP 호출만 책임진다(SRP). 여러 번 호출하거나 결과를 조합하는 로직은
@@ -150,15 +151,16 @@ src/error_rag_mcp/
   검색 결과를 우선)해 병합 반환
 - `register_error_resolution`: `error_summary`(300자 이내) 검증 → `error_keyword`(1~3개)
   검증 → `_compose_content()`로 `content` 생성(요약+키워드 결합, text_matching이 키워드를
-  찾을 수 있도록 서버가 강제 결합) → `_compose_report()`로 `extended_content`(표준 보고서)
-  생성 → 등록
+  찾을 수 있도록 서버가 강제 결합) → `_compose_location()`으로 `host_id`+`was_instance_id`를
+  결합해 오류 발생 위치 생성 → `_compose_report()`로 `extended_content`(표준 보고서) 생성 →
+  등록
 
 ### MCP 도구
 
 | 도구명 | 설명 | 파라미터 |
 |--------|------|----------|
 | `search_similar_error` | 오류 요약(벡터)+키워드(텍스트 매칭) 병행 검색, id 기준 distinct 병합 | `error_summary`, `error_keyword` |
-| `register_error_resolution` | 오류 및 조치 결과를 표준 보고서로 등록 | `error_summary`, `error_keyword`(최대 3개), `error_occurred_at`, `error_content`, `action_taken_at`, `actor`, `action_content` |
+| `register_error_resolution` | 오류 및 조치 결과를 표준 보고서로 등록 | `error_summary`, `error_keyword`(최대 3개), `error_occurred_at`, `host_id`, `was_instance_id`, `error_content`, `action_taken_at`, `actor`, `action_content` |
 
 ### 의존성 흐름 및 설계 근거
 

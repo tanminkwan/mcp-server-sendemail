@@ -102,6 +102,11 @@ Docker로 구동되는 `llm-agent` 서비스의 REST API 2종을 사용한다.
     있도록 쓰이는 오류 코드/식별 키워드 목록(예: `["ORA-00001", "HTTP 500"]`). **최대 3개**까지 지정
     가능(1개 이상 필수).
   - `error_occurred_at` (str): 오류 발생일시
+  - `host_id` (str): 오류가 발생한 호스트 ID. '서버' 또는 '시스템'이라고도 부른다
+    (`extract_error_log_mcp`의 `host_id`와 동일한 의미).
+  - `was_instance_id` (str): 오류가 발생한 WAS 인스턴스 ID. 보통 `_MS`를 포함한다(예: `ONL_MS12`,
+    `extract_error_log_mcp`의 `was_instance_id`와 동일한 의미). 호출자(AI Agent)가 오류 탐지·분석
+    과정에서 이미 파악하고 있는 값을 그대로 전달한다.
   - `error_content` (str): 오류 내용 (상세)
   - `action_taken_at` (str): 조치일시
   - `actor` (str): 조치자
@@ -117,26 +122,45 @@ Docker로 구동되는 `llm-agent` 서비스의 REST API 2종을 사용한다.
      로 항상 모든 키워드가 포함되도록 보장한다. 이렇게 하면 text_matching이 `content` 필드만 검색하는
      제약(3.1절)을 빠뜨릴 위험이 없다. 결합 후 `content`의 최종 길이에는 **별도 상한을 두지 않는다**
      (요구사항: keyword 최대 3개 제한으로 충분히 짧게 유지되므로 별도 300자 재검증 없음).
-  4. 위 5개 보고서 필드를 **표준 보고서 템플릿**(3.3절)에 대입하여 `extended_content`를 생성한다.
-  5. `KnowledgeCreate` 페이로드(`collection_name`, `domain_id` — 환경변수 고정값, `content`(3번에서
+  4. `host_id`와 `was_instance_id`를 `config.py`의 결합 템플릿 상수
+     (`LOCATION_COMPOSE_TEMPLATE = "{host_id} / {was_instance_id}"`)로 연결해 오류 발생 위치
+     문자열을 생성한다.
+  5. 위 6개 보고서 필드(오류 발생일시, 오류 발생 위치, 오류 내용, 조치일시, 조치자, 조치 내용)를
+     **표준 보고서 템플릿**(3.3절)에 대입하여 `extended_content`를 생성한다.
+  6. `KnowledgeCreate` 페이로드(`collection_name`, `domain_id` — 환경변수 고정값, `content`(3번에서
      결합 생성한 값), `extended_content`, `source`)를 구성한다. `source`는 신규 등록 건이므로
      `point_id`는 지정하지 않는다 (수정/Upsert는 본 도구의 범위 밖).
      - `source` 값은 환경변수 `RAG_SOURCE`(기본값 `"error-resolution-report"`)로 고정 관리한다 — 검색 시
        출처 필터링에 활용 가능.
-  6. `POST /api/rag/knowledge` 호출 후 응답(등록된 `point_id` 등)을 반환한다.
+  7. `POST /api/rag/knowledge` 호출 후 응답(등록된 `point_id` 등)을 반환한다.
 - **출력**: 등록 결과 JSON 문자열.
 
 ### 3.3 오류 및 조치 보고서 템플릿 (`extended_content`)
 표준 오류 조치 보고서 양식을 고정 템플릿으로 `config.py`에 상수로 정의하고, 입력값을 대입해 생성한다.
+각 필드는 `- 필드명: 값` 형태의 한 줄 bullet이 아니라 `### N. 필드명` 대목차와 값을 별도 블록으로
+분리한다. `action_content` 등 입력값 자체가 마크다운(제목, 목록 등)을 포함하는 경우에도 한 줄
+bullet에 이어 붙이면 문서 구조가 깨지므로, 필드별 섹션으로 분리해 안전하게 포함되도록 한다.
 
 ```text
 # 오류 및 조치 보고서
 
-- 오류 발생일시: {error_occurred_at}
-- 오류 내용: {error_content}
-- 조치일시: {action_taken_at}
-- 조치자: {actor}
-- 조치 내용: {action_content}
+### 1. 오류 발생일시
+{error_occurred_at}
+
+### 2. 오류 발생 위치
+{host_id} / {was_instance_id}
+
+### 3. 오류 내용
+{error_content}
+
+### 4. 조치일시
+{action_taken_at}
+
+### 5. 조치자
+{actor}
+
+### 6. 조치 내용
+{action_content}
 ```
 
 ## 4. `content` / `extended_content` 필드 설계 원칙

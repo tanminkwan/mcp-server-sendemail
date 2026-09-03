@@ -73,7 +73,7 @@ error-rag-mcp
 | 도구명 | 설명 | 파라미터 |
 |--------|------|----------|
 | `search_similar_error` | 오류 요약(벡터 검색)+키워드(텍스트 매칭)로 과거 유사 오류/조치 사례 검색, id 기준 distinct 병합 | `error_summary`, `error_keyword` |
-| `register_error_resolution` | 오류 및 조치 결과를 표준 보고서 형식으로 등록 | `error_summary`, `error_keyword`(최대 3개), `error_occurred_at`, `error_content`, `action_taken_at`, `actor`, `action_content` |
+| `register_error_resolution` | 오류 및 조치 결과를 표준 보고서 형식으로 등록 | `error_summary`, `error_keyword`(최대 3개), `error_occurred_at`, `host_id`, `was_instance_id`, `error_content`, `action_taken_at`, `actor`, `action_content` |
 
 > `search_similar_error`는 오류 발생 시 과거 유사 사례·조치 방법을 먼저 확인하는 용도이고,
 > `register_error_resolution`은 조치가 끝난 뒤 그 결과를 다시 지식으로 쌓는 용도이다. `content`
