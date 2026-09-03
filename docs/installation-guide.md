@@ -540,7 +540,7 @@ Mermaid 다이어그램, 코드 블록, 표 등이 자동 변환된다.
 | 파라미터 | 타입 | 필수 | 설명 | 예시 |
 |----------|------|:----:|------|------|
 | `error_summary` | string | O | 오류 내용 요약 (300자 이내) | `"DB 커넥션 풀 고갈로 응답 지연 발생"` |
-| `error_keyword` | string | O | 오류 코드 등 핵심 식별 키워드 | `"ORA-00001"` |
+| `error_keyword` | string | O | 오류 코드 등 핵심 식별 키워드 (없으면 빈 문자열 — 이 경우 텍스트 매칭 검색은 건너뛰고 벡터 검색만 수행) | `"ORA-00001"` |
 
 ### register_error_resolution (error-rag-mcp)
 

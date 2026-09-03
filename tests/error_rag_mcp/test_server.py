@@ -119,6 +119,26 @@ class TestSearchSimilarErrorTool:
         assert result == []
 
     @respx.mock
+    async def test_blank_keyword_skips_text_matching_search(self, mcp, _env):
+        """error_keyword가 빈 문자열이면 text_matching 검색을 건너뛰고 벡터 검색만 수행한다."""
+        vector_results = [
+            {"id": "a", "collection": "c", "score": 0.9, "content": "x",
+             "extended_content": "x", "domain_id": 6, "source": "s",
+             "created_at": "2026-01-01T00:00:00+00:00"},
+        ]
+        route = respx.post(SEARCH_URL).mock(
+            return_value=httpx.Response(200, json=vector_results)
+        )
+
+        tool_fn = mcp._tool_manager._tools["search_similar_error"].fn
+        result = json.loads(await tool_fn(error_summary="요약", error_keyword=""))
+
+        assert result == vector_results
+        assert route.call_count == 1
+        payload = json.loads(route.calls.last.request.read())
+        assert payload["search_method"] == "vector"
+
+    @respx.mock
     async def test_search_api_error_returns_error_message(self, mcp, _env):
         """검색 API 오류 시 오류 메시지를 반환한다."""
         respx.post(SEARCH_URL).mock(return_value=httpx.Response(500))
@@ -206,6 +226,21 @@ class TestRegisterErrorResolutionTool:
         result = await tool_fn(
             error_summary="요약",
             error_keyword=["A", "B", "C", "D"],
+            error_occurred_at="2026-09-03 10:00:00",
+            error_content="상세",
+            action_taken_at="2026-09-03 10:30:00",
+            actor="김철수",
+            action_content="조치",
+        )
+
+        assert "error_keyword" in result
+
+    async def test_error_keyword_with_blank_entry_is_rejected(self, mcp, _env):
+        """error_keyword 목록에 빈 문자열이 있으면 등록을 거부한다."""
+        tool_fn = mcp._tool_manager._tools["register_error_resolution"].fn
+        result = await tool_fn(
+            error_summary="요약",
+            error_keyword=["ORA-00001", "  "],
             error_occurred_at="2026-09-03 10:00:00",
             error_content="상세",
             action_taken_at="2026-09-03 10:30:00",

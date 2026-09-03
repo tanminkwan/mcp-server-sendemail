@@ -11,7 +11,18 @@
 > `tests/error_rag_mcp/`(`test_config.py`/`test_client.py`/`test_server.py`)를 본 문서의 3~8절대로
 > TDD로 구현했다. `pytest` 전체 63개(신규 37개 포함) 모두 통과, `error_rag_mcp` 라인 커버리지 96%
 > (요구사항 85% 이상 충족). `pyproject.toml`에 `error-rag-mcp` 엔트리포인트와 커버리지 대상을
-> 추가했고, `.env.example`에 `RAG_*` 환경변수를 추가했다.
+> 추가했고, `.env.example`에 `RAG_*` 환경변수를 추가했다. 실제 llm-agent에 검증용 도메인/콜렉션을
+> 만들어 stdio MCP 클라이언트로 직접 접속해 `search_similar_error`/`register_error_resolution`을
+> end-to-end로 확인함(등록→검색 재발견→dedupe 확인→정리 완료).
+>
+> **AI Agent 사용성 보완** (2026-09-03): `search_similar_error`에 빈 `error_keyword`("")로
+> text_matching 검색을 하면 llm-agent가 무관한 결과(score 0.0)를 반환한다는 것을 실제 호출로
+> 확인했다. 이에 따라 (1) `error_keyword`가 비어 있으면 text_matching 호출 자체를 건너뛰고 벡터
+> 검색 결과만 반환하도록 `server.py`를 수정했고, (2) `register_error_resolution`의 `error_keyword`
+> 목록에 빈 문자열이 섞여 있으면 등록을 거부하도록 검증을 추가했다. (3) 두 도구의 docstring과
+> `SERVER_INSTRUCTIONS`에 자연어 트리거 문구, 도구 호출 순서(검색→조치→등록), `error_keyword`를
+> 두 도구에서 동일하게 재사용해야 하는 이유, 빈 결과(`[]`)의 의미를 명시해 AI Agent가 오작동 없이
+> 사용할 수 있도록 보강했다.
 
 ## 1. 개요
 
