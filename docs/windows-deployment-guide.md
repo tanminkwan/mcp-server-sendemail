@@ -54,7 +54,8 @@ python -m venv .venv
 
 ```powershell
 # mcp_server_collection 파일명은 실제 생성된 버전에 맞게 수정하여 입력합니다.
-pip install mcp_server_collection-0.1.0-py3-none-any.whl --no-index --find-links=./offline-packages-win
+# 이미 동일한 버전이 설치되어 있어도 덮어쓰도록 --force-reinstall 옵션을 사용합니다.
+pip install mcp_server_collection-0.1.0-py3-none-any.whl --no-index --find-links=./offline-packages-win --force-reinstall
 ```
 이 과정에서 소스 코드를 참조하지 않고(`.whl` 파일 기반), 오프라인 패키지 폴더에서 필요한 라이브러리를 모두 가져와 설치가 완료됩니다.
 
@@ -116,3 +117,35 @@ python -m build --no-isolation
 원래 `python -m build`를 실행하면 인터넷에서 임시 환경(Isolation) 구축을 위한 라이브러리들을 자동으로 다운받으려고 시도합니다. 인터넷이 차단된 오프라인 환경에서는 이 과정에서 에러가 발생하므로, `--no-isolation` 옵션을 주어 "미리 설치해둔(tmp에서 가져온) 도구들을 그대로 사용하여 임시 환경 없이 빌드하라"고 강제하는 것입니다.
 
 빌드가 끝나면 `dist/` 폴더에 `.whl` 파일이 생성되며, 이후 설치는 본 문서의 `2-3. 오프라인 설치` 단계와 동일하게 진행하시면 됩니다.
+
+---
+
+## 5. 소스 코드 수정 후 오프라인 재배포 (업데이트) 방법
+
+인터넷이 단절된 Windows 환경에서 코드를 직접 수정(`src/` 하위 파일 등)하고 이를 다시 적용하려면 아래 과정을 거쳐 업데이트합니다.
+
+1. **가상환경 활성화**
+   ```powershell
+   cd C:\mcp-server
+   .venv\Scripts\Activate.ps1
+   ```
+
+2. **이전 빌드 산출물 삭제 (권장)**
+   새로운 빌드 파일과 혼동되지 않도록 기존 휠 파일을 지웁니다.
+   ```powershell
+   Remove-Item -Path .\dist\* -Recurse -Force
+   ```
+
+3. **오프라인 재빌드**
+   수정된 코드를 바탕으로 새로운 휠(`.whl`) 파일을 빌드합니다. 인터넷이 없으므로 반드시 `--no-isolation` 옵션을 사용해야 합니다.
+   *(※ 4-2 단계의 빌드 도구가 이미 설치되어 있어야 합니다.)*
+   ```powershell
+   python -m build --no-isolation
+   ```
+
+4. **강제 재설치 (업데이트 적용)**
+   새로 빌드된 패키지를 `--force-reinstall` 옵션으로 덮어씌웁니다. 외부 라이브러리 참조를 위해 기존 `offline-packages-win` 폴더도 함께 지정합니다.
+   ```powershell
+   # 실제 dist 폴더에 생성된 버전에 맞게 파일명 수정
+   pip install .\dist\mcp_server_collection-0.1.0-py3-none-any.whl --no-index --find-links=.\offline-packages-win --force-reinstall
+   ```

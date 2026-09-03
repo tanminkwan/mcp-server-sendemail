@@ -33,15 +33,15 @@ def create_server() -> MCPServer:
         was_instance_id: str,
     ) -> str:
         """서버의 '에러(error) 로그' 추출을 요청하고 command_id를 반환합니다.
-        '서버 ooo에서 error를 찾아' 또는 '에러 로그를 확인해줘'와 같은 요청에 이 도구를 사용하세요.
-        AI Agent는 이 도구를 호출하여 command_id를 얻은 후, 약 1분간 대기(wait)하고 나서 get_extracted_log 도구를 호출해야 합니다.
+        '서버 또는 시스템 ooo에서 error를 찾아' 또는 '에러 로그를 확인해줘'와 같은 요청에 이 도구를 사용하세요.
+        AI Agent는 이 도구를 호출하여 command_id를 얻은 후, 반드시 사용자에게 "로그 추출에 약 1분 정도 소요됩니다"라고 안내하는 메시지를 먼저 응답해야 합니다. 그 후 실제로 약 1분간 대기(wait)하고 나서 get_extracted_log 도구를 호출해야 합니다.
 
         Args:
             date: 로그 추출 대상 일자 (포맷: yyyymmdd, 8자리 숫자)
-            host_id: 호스트 ID ('서버'라고도 부름)
+            host_id: 호스트 ID ('서버' 또는 '시스템'이라고도 부름)
             time_from: 검색 시작 시간 (포맷: hhmiss, 6자리 숫자, time_to 보다 이전이어야 함)
             time_to: 검색 종료 시간 (포맷: hhmiss, 6자리 숫자)
-            was_instance_id: WAS 인스턴스 ID (반드시 '_MS' 문자열을 포함해야 함)
+            was_instance_id: WAS 인스턴스 ID (반드시 '_MS' 문자열을 포함해야 함, 'OOO 서버의 XXX' 식으로 부를 경우 XXX는 WAS 인스턴스 ID 입니다. 예: 서버 pcbkaa11의 ONL_MS12)
         """
         import re
         if not re.match(r"^\d{8}$", date):

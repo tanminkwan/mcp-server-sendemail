@@ -95,3 +95,22 @@ class TestSettings:
         settings = Settings()
 
         assert settings.auth_header == {"Authorization": "Bearer my-secret-token"}
+
+    def test_recipient_mapping_comma_separated(self, monkeypatch):
+        """쉼표 구분 파싱을 테스트한다."""
+        monkeypatch.setenv("API_BASE_URL", "https://test.example.com")
+        monkeypatch.setenv("API_BEARER_TOKEN", "token")
+        monkeypatch.setenv("EMAIL_RECIPIENT_MAPPING", "홍길동:hong@test.com, 김철수:kim@test.com")
+
+        settings = Settings()
+        assert settings.recipient_mapping == {"홍길동": "hong@test.com", "김철수": "kim@test.com"}
+
+    def test_recipient_mapping_json(self, monkeypatch):
+        """JSON 데이터 파싱을 테스트한다."""
+        monkeypatch.setenv("API_BASE_URL", "https://test.example.com")
+        monkeypatch.setenv("API_BEARER_TOKEN", "token")
+        monkeypatch.setenv("EMAIL_RECIPIENT_MAPPING", '{"홍길동": "hong@test.com"}')
+
+        settings = Settings()
+        assert settings.recipient_mapping == {"홍길동": "hong@test.com"}
+

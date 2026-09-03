@@ -136,3 +136,36 @@ class TestSendMarkdownEmailTool:
         )
 
         assert "오류" in result or "error" in result.lower() or "400" in result
+
+    @respx.mock
+    async def test_send_email_receiver_mapping(self, monkeypatch):
+        """수신자 이름 매핑 및 오류 처리 테스트."""
+        monkeypatch.setenv("API_BASE_URL", "https://api.test.local:20443")
+        monkeypatch.setenv("API_BEARER_TOKEN", "test-token")
+        monkeypatch.setenv("EMAIL_RECIPIENT_MAPPING", "홍길동:hong@example.com")
+
+        route = respx.post("https://api.test.local:20443/api/v1/email/send").mock(
+            return_value=httpx.Response(200, json={"message": "Email sent successfully"})
+        )
+
+        mcp_server = create_server()
+        tool_fn = mcp_server._tool_manager._tools["send_html_email"].fn
+
+        # 1. 매핑된 이름과 이메일 주소 혼합 테스트
+        result = await tool_fn(
+            receivers="홍길동, direct@example.com",
+            subject="제목",
+            content="<p>본문</p>",
+        )
+        assert "Email sent successfully" in result
+        assert route.calls.last.request.content != b""
+        
+        # 2. 매핑 정보 없는 이름 테스트 -> 오류 반환
+        error_result = await tool_fn(
+            receivers="없는사람",
+            subject="제목",
+            content="<p>본문</p>",
+        )
+        assert "이메일 발송 오류" in error_result
+        assert "없는사람" in error_result
+

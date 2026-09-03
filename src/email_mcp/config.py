@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 
 from dotenv import load_dotenv
@@ -32,6 +33,9 @@ class Settings:
             os.getenv("API_SSL_VERIFY"), DEFAULT_SSL_VERIFY
         )
         self.api_timeout = int(os.getenv("API_TIMEOUT", str(DEFAULT_TIMEOUT)))
+        self.recipient_mapping: dict[str, str] = self._parse_mapping(
+            os.getenv("EMAIL_RECIPIENT_MAPPING", "")
+        )
 
     # -- derived properties --------------------------------------------------
 
@@ -61,3 +65,22 @@ class Settings:
         if value is None:
             return default
         return value.lower() in ("true", "1", "yes")
+
+    @staticmethod
+    def _parse_mapping(value: str) -> dict[str, str]:
+        if not value:
+            return {}
+        try:
+            return json.loads(value)
+        except json.JSONDecodeError:
+            pass
+
+        # 쉼표 구분 및 콜론(이름:이메일) 형태의 문자열 파싱 (Fallback)
+        mapping = {}
+        for pair in value.split(","):
+            pair = pair.strip()
+            if ":" in pair:
+                name, email = pair.split(":", 1)
+                mapping[name.strip()] = email.strip()
+        return mapping
+
