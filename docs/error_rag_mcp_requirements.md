@@ -6,6 +6,12 @@
 > (2026-09-03). 인증(HTTPBearer)이 OpenAPI 스펙상 정의되어 있으나, 현재 `llm-agent`는 Authorization
 > 헤더 없이도 정상 응답한다(추후 API Key 적용 가능성 있으므로 클라이언트는 Bearer 헤더를 선택적으로
 > 실어 보낼 수 있게 구현한다). 남은 미확정 사항은 9절 참조.
+>
+> **구현 완료** (2026-09-03): `src/error_rag_mcp/`(`config.py`/`client.py`/`server.py`) 및
+> `tests/error_rag_mcp/`(`test_config.py`/`test_client.py`/`test_server.py`)를 본 문서의 3~8절대로
+> TDD로 구현했다. `pytest` 전체 63개(신규 37개 포함) 모두 통과, `error_rag_mcp` 라인 커버리지 96%
+> (요구사항 85% 이상 충족). `pyproject.toml`에 `error-rag-mcp` 엔트리포인트와 커버리지 대상을
+> 추가했고, `.env.example`에 `RAG_*` 환경변수를 추가했다.
 
 ## 1. 개요
 
