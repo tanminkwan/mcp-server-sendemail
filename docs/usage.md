@@ -28,13 +28,17 @@ email-mcp
 | `API_BEARER_TOKEN` | JWT 인증 토큰 | O | — |
 | `API_SSL_VERIFY` | SSL 인증서 검증 여부 | X | `false` |
 | `API_TIMEOUT` | HTTP 요청 타임아웃(초) | X | `60` |
+| `EMAIL_RECIPIENT_MAPPING` | 수신자 이름-이메일 매핑 (JSON 또는 `이름:이메일` 콤마 구분) | X | — |
+
+> **수신자 이름 매핑**: `EMAIL_RECIPIENT_MAPPING` 환경변수에 이름과 이메일을 등록해두면, `receivers`에 이메일 대신 이름을 입력해도 서버가 이메일 주소로 자동 변환합니다. (예: `EMAIL_RECIPIENT_MAPPING=홍길동:hong@example.com`)
 
 ## MCP 도구
 
 | 도구명 | 설명 | 파라미터 |
 |--------|------|----------|
-| `send_html_email` | HTML 이메일 발송 | `receivers`, `subject`, `content`, `sender_name`(선택) |
-| `send_markdown_email` | Markdown 이메일 발송 | `receivers`, `subject`, `content`, `sender_name`(선택) |
+| `send_html_email` | HTML 이메일 발송 | `receivers` (이름 또는 이메일), `subject`, `content`, `sender_name`(선택) |
+| `send_markdown_email` | Markdown 이메일 발송 | `receivers` (이름 또는 이메일), `subject`, `content`, `sender_name`(선택) |
+
 
 ## 테스트
 

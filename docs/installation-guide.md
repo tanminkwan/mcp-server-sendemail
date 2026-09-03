@@ -213,6 +213,8 @@ cp .env.example .env
 API_BASE_URL=https://app.mwm.local:20443
 API_BEARER_TOKEN=여기에_실제_JWT_토큰_입력
 API_SSL_VERIFY=false
+# 선택: 수신자 이름 매핑 (JSON 또는 이름:이메일 콤마 구분)
+EMAIL_RECIPIENT_MAPPING=홍길동:hong@example.com, 김철수:kim@example.com
 ```
 
 | 변수 | 설명 | 필수 | 기본값 |
@@ -221,6 +223,8 @@ API_SSL_VERIFY=false
 | `API_BEARER_TOKEN` | JWT 인증 토큰 | O | — |
 | `API_SSL_VERIFY` | SSL 인증서 검증 여부 | X | `false` |
 | `API_TIMEOUT` | HTTP 요청 타임아웃(초) | X | `60` |
+| `EMAIL_RECIPIENT_MAPPING` | 수신자 이름-이메일 매핑 | X | — |
+
 
 ### 5-3. JWT 토큰 발급
 
@@ -231,6 +235,15 @@ https://app.mwm.local:20443/common/generate_long_term_token
 ```
 
 > 토큰은 `.env` 파일에만 저장하고, 절대 코드에 직접 삽입하지 않는다.
+
+### 5-4. 수신자 이름 매핑 설정 (선택)
+
+`EMAIL_RECIPIENT_MAPPING` 환경변수를 설정하면 이메일 발송 시 `receivers`에 이메일 주소 대신 사람 이름만 전달해도 서버가 매핑된 이메일 주소로 자동 변환합니다.
+
+- **콤마/콜론 구분 형식 (권장)**: `EMAIL_RECIPIENT_MAPPING=홍길동:hong@example.com, 김철수:kim@example.com`
+- **JSON 형식**: `EMAIL_RECIPIENT_MAPPING={"홍길동": "hong@example.com", "김철수": "kim@example.com"}`
+- 매핑되지 않은 이름이 전달될 경우, 도구는 사용자에게 이메일 주소를 찾을 수 없다는 에러 메시지를 반환합니다.
+
 
 ---
 
@@ -410,7 +423,7 @@ HTML 형식의 이메일을 발송한다.
 
 | 파라미터 | 타입 | 필수 | 설명 | 예시 |
 |----------|------|:----:|------|------|
-| `receivers` | string | O | 수신인 (콤마로 다수 지정) | `"a@b.com, c@d.com"` |
+| `receivers` | string | O | 수신자 이름 또는 이메일 (등록된 이름 자동 변환, 콤마로 다수 지정) | `"홍길동, direct@example.com"` |
 | `subject` | string | O | 메일 제목 | `"[알림] 점검 안내"` |
 | `content` | string | O | 메일 본문 (HTML) | `"<h1>안내</h1><p>내용</p>"` |
 | `sender_name` | string | X | 발신인 표시 이름 | `"시스템 관리자"` |
@@ -422,10 +435,11 @@ Mermaid 다이어그램, 코드 블록, 표 등이 자동 변환된다.
 
 | 파라미터 | 타입 | 필수 | 설명 | 예시 |
 |----------|------|:----:|------|------|
-| `receivers` | string | O | 수신인 (콤마로 다수 지정) | `"a@b.com"` |
+| `receivers` | string | O | 수신자 이름 또는 이메일 (등록된 이름 자동 변환, 콤마로 다수 지정) | `"홍길동"` |
 | `subject` | string | O | 메일 제목 | `"[보고서] 점검 결과"` |
 | `content` | string | O | 메일 본문 (Markdown) | `"# 제목\n- 항목1\n- 항목2"` |
 | `sender_name` | string | X | 발신인 표시 이름 | `"리발소 시스템"` |
+
 
 ### 사용 예시 (Claude 채팅)
 

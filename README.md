@@ -37,6 +37,13 @@ email-mcp
 | `API_BEARER_TOKEN` | JWT 인증 토큰 | O | — |
 | `API_SSL_VERIFY` | SSL 인증서 검증 여부 | X | `false` |
 | `API_TIMEOUT` | HTTP 요청 타임아웃(초) | X | `60` |
+| `EMAIL_RECIPIENT_MAPPING` | 수신자 이름-이메일 매핑 (JSON 또는 `이름:이메일` 콤마 구분) | X | — |
+
+> **수신자 이름 매핑 (`EMAIL_RECIPIENT_MAPPING`)**:
+> - `EMAIL_RECIPIENT_MAPPING` 환경변수에 이름과 이메일 주소를 등록하면, 이메일 발송 시 `receivers`에 이메일 주소 대신 이름만 지정해도 서버가 자동으로 이메일 주소로 변환합니다.
+> - **콤마 구분 형식**: `홍길동:hong@example.com, 김철수:kim@example.com`
+> - **JSON 형식**: `{"홍길동": "hong@example.com", "김철수": "kim@example.com"}`
+
 
 ## VS Code 설정
 
@@ -118,7 +125,7 @@ HTML 태그가 포함된 이메일 또는 일반 텍스트 이메일을 발송�
 
 | 파라미터 | 타입 | 필수 | 설명 |
 |----------|------|:----:|------|
-| `receivers` | string | O | 수신인 이메일 주소 (콤마로 다수 지정) |
+| `receivers` | string | O | 수신자 이름 또는 이메일 주소 (등록된 이름인 경우 자동 변환, 콤마로 다수 지정) |
 | `subject` | string | O | 메일 제목 |
 | `content` | string | O | 메일 본문 (HTML 또는 일반 텍스트) |
 | `sender_name` | string | X | 발신인 표시 이름 |
@@ -129,10 +136,11 @@ Markdown 본문을 HTML로 자동 변환하여 발송합니다. 헤더, 목록, 
 
 | 파라미터 | 타입 | 필수 | 설명 |
 |----------|------|:----:|------|
-| `receivers` | string | O | 수신인 이메일 주소 (콤마로 다수 지정) |
+| `receivers` | string | O | 수신자 이름 또는 이메일 주소 (등록된 이름인 경우 자동 변환, 콤마로 다수 지정) |
 | `subject` | string | O | 메일 제목 |
 | `content` | string | O | 메일 본문 (Markdown 형식) |
 | `sender_name` | string | X | 발신인 표시 이름 |
+
 
 ## 프로젝트 구조
 

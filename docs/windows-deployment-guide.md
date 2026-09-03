@@ -82,9 +82,14 @@ pip install mcp_server_collection-0.1.0-py3-none-any.whl --no-index --find-links
 API_BASE_URL=https://app.mwm.local:20443
 API_BEARER_TOKEN=발급받은_JWT_토큰_입력
 API_SSL_VERIFY=false
+# 선택: 수신자 이름 매핑 (JSON 또는 이름:이메일 콤마 구분)
+EMAIL_RECIPIENT_MAPPING=홍길동:hong@example.com, 김철수:kim@example.com
 ```
 
+*참고: `EMAIL_RECIPIENT_MAPPING`을 설정하면 이메일 주소 대신 `홍길동` 같은 수신자 이름만 전달해도 자동으로 이메일 주소로 변환하여 발송합니다.*
+
 이제 VS Code의 `mcp.json`이나 클라이언트 설정 파일에서 `command` 경로를 `C:\mcp-server\.venv\Scripts\email-mcp.exe` 로 지정하여 사용하시면 됩니다!
+
 
 ---
 
