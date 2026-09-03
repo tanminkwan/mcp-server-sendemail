@@ -178,21 +178,25 @@ pip install --no-index --find-links=./offline-packages-win -e .
 설치 확인:
 
 ```bash
-pip list | grep email-mcp
+pip list | grep mcp-server-collection
 ```
 
-출력 예시: `email-mcp  0.1.0  /path/to/email-mcp-server`
+출력 예시: `mcp-server-collection  0.1.0  /path/to/email-mcp-server`
 
 ### 4-3. 설치 검증
 
 ```bash
 email-mcp --help
+extract-error-log-mcp --help
+error-rag-mcp --help
 ```
 
 또는 Python으로 직접 실행 확인:
 
 ```bash
 python -c "from email_mcp.server import create_server; print('OK')"
+python -c "from extract_error_log_mcp.server import create_server; print('OK')"
+python -c "from error_rag_mcp.server import create_server; print('OK')"
 ```
 
 ---
@@ -225,6 +229,8 @@ EMAIL_RECIPIENT_MAPPING=홍길동:hong@example.com, 김철수:kim@example.com
 | `API_TIMEOUT` | HTTP 요청 타임아웃(초) | X | `60` |
 | `EMAIL_RECIPIENT_MAPPING` | 수신자 이름-이메일 매핑 | X | — |
 
+> 위 표는 `email-mcp`/`extract-error-log-mcp`가 공유하는 환경변수이다. `error-rag-mcp`는 별도의
+> `RAG_*` 환경변수를 사용한다 ([5-5. Error RAG MCP 환경변수](#5-5-error-rag-mcp-환경변수) 참조).
 
 ### 5-3. JWT 토큰 발급
 
@@ -244,6 +250,36 @@ https://app.mwm.local:20443/common/generate_long_term_token
 - **JSON 형식**: `EMAIL_RECIPIENT_MAPPING={"홍길동": "hong@example.com", "김철수": "kim@example.com"}`
 - 매핑되지 않은 이름이 전달될 경우, 도구는 사용자에게 이메일 주소를 찾을 수 없다는 에러 메시지를 반환합니다.
 
+### 5-5. Error RAG MCP 환경변수
+
+`error-rag-mcp`는 llm-agent RAG API와 통신하며, 위 `API_*`/`EMAIL_*` 변수와는 완전히 별도인
+`RAG_*` 환경변수를 사용한다. 같은 `.env` 파일에 아래 값을 추가하면 된다.
+
+```env
+RAG_API_BASE_URL=http://localhost:28000
+# 선택: 현재 llm-agent는 API Key 없이 접근 가능. 인증이 필요해지면 설정.
+RAG_API_BEARER_TOKEN=
+RAG_API_SSL_VERIFY=false
+RAG_COLLECTION_NAME=여기에_실제_콜렉션_ID_입력
+RAG_DOMAIN_ID=여기에_실제_도메인_ID_입력
+RAG_VECTOR_SEARCH_LIMIT=3
+RAG_TEXT_MATCHING_LIMIT=2
+RAG_SOURCE=error-resolution-report
+```
+
+| 변수 | 설명 | 필수 | 기본값 |
+|------|------|:----:|--------|
+| `RAG_API_BASE_URL` | llm-agent 서비스 기본 URL | O | — |
+| `RAG_API_BEARER_TOKEN` | 인증 토큰 (현재 미인증 접근 가능) | X | — (헤더 생략) |
+| `RAG_API_SSL_VERIFY` | SSL 인증서 검증 여부 | X | `false` |
+| `RAG_COLLECTION_NAME` | 고정 콜렉션 식별자 | O | — |
+| `RAG_DOMAIN_ID` | 고정 도메인 ID (정수) | O | — |
+| `RAG_VECTOR_SEARCH_LIMIT` | 벡터 검색 결과 개수 | X | `3` |
+| `RAG_TEXT_MATCHING_LIMIT` | 텍스트 매칭 검색 결과 개수 | X | `2` |
+| `RAG_SOURCE` | 등록 시 지식의 `source` 태그 | X | `error-resolution-report` |
+
+> `RAG_COLLECTION_NAME`/`RAG_DOMAIN_ID`는 llm-agent의 `/api/collections`, `/api/domains` API로
+> 미리 생성해둔 값이어야 한다. 상세 설계 근거는 [error_rag_mcp 요구사항 정의서](error_rag_mcp_requirements.md) 참조.
 
 ---
 
@@ -384,6 +420,46 @@ VS Code `settings.json` (`Ctrl+Shift+P` → **Preferences: Open User Settings (J
 }
 ```
 
+#### 참고: 여러 MCP 서버 동시 등록
+
+`servers`(또는 `mcp.servers`) 객체에 키를 추가하면 `extract-error-log-mcp`, `error-rag-mcp`도
+같은 `mcp.json`에서 함께 등록할 수 있다 (Linux 예시, 방법 B 기준):
+
+```json
+{
+  "servers": {
+    "email-mcp": {
+      "type": "stdio",
+      "command": "/home/사용자명/projects/email-mcp-server/.venv/bin/email-mcp",
+      "env": {
+        "API_BASE_URL": "https://app.mwm.local:20443",
+        "API_BEARER_TOKEN": "your_jwt_token_here"
+      }
+    },
+    "extract-error-log-mcp": {
+      "type": "stdio",
+      "command": "/home/사용자명/projects/email-mcp-server/.venv/bin/extract-error-log-mcp",
+      "env": {
+        "API_BASE_URL": "https://app.mwm.local:20443",
+        "API_BEARER_TOKEN": "your_jwt_token_here"
+      }
+    },
+    "error-rag-mcp": {
+      "type": "stdio",
+      "command": "/home/사용자명/projects/email-mcp-server/.venv/bin/error-rag-mcp",
+      "env": {
+        "RAG_API_BASE_URL": "http://localhost:28000",
+        "RAG_COLLECTION_NAME": "여기에_실제_콜렉션_ID_입력",
+        "RAG_DOMAIN_ID": "여기에_실제_도메인_ID_입력"
+      }
+    }
+  }
+}
+```
+
+> `email-mcp`/`extract-error-log-mcp`는 `API_*` 변수를, `error-rag-mcp`는 `RAG_*` 변수를 쓴다는
+> 점만 다르고 등록 방식은 동일하다.
+
 ---
 
 ## 7. 동작 확인
@@ -391,8 +467,8 @@ VS Code `settings.json` (`Ctrl+Shift+P` → **Preferences: Open User Settings (J
 ### 7-1. MCP 서버 연결 확인
 
 1. VS Code에서 Claude 채팅 패널을 연다
-2. MCP 서버 목록에 **email-mcp** 가 표시되는지 확인한다
-3. 도구 목록에 `send_html_email`, `send_markdown_email` 이 보이면 정상
+2. MCP 서버 목록에 **email-mcp**(및 등록한 경우 **extract-error-log-mcp**, **error-rag-mcp**)가 표시되는지 확인한다
+3. 도구 목록에 `send_html_email`, `send_markdown_email`(그리고 등록한 서버의 도구)이 보이면 정상
 
 ### 7-2. 테스트 이메일 발송
 
@@ -456,6 +532,44 @@ Mermaid 다이어그램, 코드 블록, 표 등이 자동 변환된다.
   - DB 백업 정책 검토
 ```
 
+### search_similar_error (error-rag-mcp)
+
+오류 요약(벡터 검색)과 오류 코드 등 핵심 키워드(텍스트 매칭 검색)를 함께 사용해 과거 유사
+오류/조치 사례를 검색한다.
+
+| 파라미터 | 타입 | 필수 | 설명 | 예시 |
+|----------|------|:----:|------|------|
+| `error_summary` | string | O | 오류 내용 요약 (300자 이내) | `"DB 커넥션 풀 고갈로 응답 지연 발생"` |
+| `error_keyword` | string | O | 오류 코드 등 핵심 식별 키워드 | `"ORA-00001"` |
+
+### register_error_resolution (error-rag-mcp)
+
+조치가 끝난 오류와 그 조치 결과를 표준 보고서 형식으로 RAG에 등록한다.
+
+| 파라미터 | 타입 | 필수 | 설명 | 예시 |
+|----------|------|:----:|------|------|
+| `error_summary` | string | O | 오류 내용 요약 (300자 이내) | `"DB 커넥션 풀 고갈로 응답 지연 발생"` |
+| `error_keyword` | list[string] | O | 핵심 식별 키워드 목록 (최대 3개) | `["ORA-00001", "CONN_POOL_EXHAUSTED"]` |
+| `error_occurred_at` | string | O | 오류 발생일시 | `"2026-09-03 10:00:00"` |
+| `error_content` | string | O | 오류 내용 (상세) | `"DB 커넥션 풀 고갈"` |
+| `action_taken_at` | string | O | 조치일시 | `"2026-09-03 10:30:00"` |
+| `actor` | string | O | 조치자 | `"김철수"` |
+| `action_content` | string | O | 조치 내용 | `"커넥션 풀 크기 확장"` |
+
+### 사용 예시 (Claude 채팅, error-rag-mcp)
+
+```
+DB 커넥션 풀 고갈로 응답 지연이 발생했어. 과거에 비슷한 오류가 있었는지 찾아줘.
+(오류 코드: ORA-00001)
+```
+
+조치를 마친 뒤에는:
+
+```
+방금 오류(ORA-00001, DB 커넥션 풀 고갈)에 대해 커넥션 풀 크기를 확장해서 해결했어.
+이 내용을 오류/조치 이력으로 등록해줘.
+```
+
 ---
 
 ## 9. 문제 해결
@@ -489,12 +603,13 @@ pip install --no-index --find-links=./offline-packages-win -e .
 ### MCP 서버가 VS Code에서 연결되지 않음
 
 1. `.vscode/mcp.json`의 `command` 경로가 정확한지 확인
-2. 가상환경 내 실행파일 존재 여부 확인:
-   - Windows: `.venv\Scripts\email-mcp.exe`
-   - Linux: `.venv/bin/email-mcp`
+2. 가상환경 내 실행파일 존재 여부 확인 (등록한 서버에 해당하는 것만):
+   - Windows: `.venv\Scripts\email-mcp.exe`, `.venv\Scripts\extract-error-log-mcp.exe`, `.venv\Scripts\error-rag-mcp.exe`
+   - Linux: `.venv/bin/email-mcp`, `.venv/bin/extract-error-log-mcp`, `.venv/bin/error-rag-mcp`
 3. 터미널에서 직접 실행해 에러 확인:
    ```bash
    .venv\Scripts\email-mcp.exe
+   .venv\Scripts\error-rag-mcp.exe
    ```
 
 ### SSL 인증서 에러
@@ -531,18 +646,24 @@ API_TIMEOUT=120
 
 ```
 email-mcp-server/
-├── .env                    ← 환경변수 (git 추적 안 함)
+├── .env                    ← 환경변수 (git 추적 안 함, API_* 와 RAG_* 모두 여기 작성)
 ├── .env.example            ← 환경변수 템플릿
 ├── .vscode/
 │   └── mcp.json            ← VS Code MCP 서버 설정
-├── pyproject.toml           ← 프로젝트 메타데이터·의존성
+├── pyproject.toml           ← 프로젝트 메타데이터·의존성 (email-mcp/extract-error-log-mcp/error-rag-mcp 엔트리포인트)
 ├── src/
-│   └── email_mcp/
-│       ├── __init__.py
-│       ├── config.py        ← 설정 관리
-│       ├── client.py        ← EmailApi HTTP 클라이언트
-│       └── server.py        ← MCP 서버 엔트리포인트
-├── tests/                   ← 테스트 코드
+│   ├── email_mcp/
+│   │   ├── __init__.py
+│   │   ├── config.py        ← 설정 관리
+│   │   ├── client.py        ← EmailApi HTTP 클라이언트
+│   │   └── server.py        ← MCP 서버 엔트리포인트
+│   ├── extract_error_log_mcp/
+│   │   └── ... (config.py / client.py / server.py)
+│   └── error_rag_mcp/
+│       ├── config.py        ← Settings, 도메인 상수 (MAX_ERROR_SUMMARY_LENGTH 등)
+│       ├── client.py        ← llm-agent RAG API 클라이언트 (RagClient)
+│       └── server.py        ← search_similar_error / register_error_resolution 엔트리포인트
+├── tests/                   ← 서버별 테스트 코드
 ├── scripts/
 │   └── send_test_email.py   ← 발송 테스트 스크립트
 ├── docs/                    ← 문서

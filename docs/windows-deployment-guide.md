@@ -68,6 +68,7 @@ pip install mcp_server_collection-0.1.0-py3-none-any.whl --no-index --find-links
 # 확인 후 Ctrl+C 로 종료하세요.
 .venv\Scripts\email-mcp.exe
 .venv\Scripts\extract-error-log-mcp.exe
+.venv\Scripts\error-rag-mcp.exe
 ```
 실행했을 때 `ModuleNotFoundError` 같은 에러 없이 무한 대기 상태로 진입한다면 완벽하게 설치된 것입니다.
 
@@ -79,16 +80,26 @@ pip install mcp_server_collection-0.1.0-py3-none-any.whl --no-index --find-links
 실행 디렉토리(`C:\mcp-server`)에 `.env` 파일을 만들고 아래와 같이 설정합니다.
 
 ```env
+# email-mcp / extract-error-log-mcp 공유 설정
 API_BASE_URL=https://app.mwm.local:20443
 API_BEARER_TOKEN=발급받은_JWT_토큰_입력
 API_SSL_VERIFY=false
 # 선택: 수신자 이름 매핑 (JSON 또는 이름:이메일 콤마 구분)
 EMAIL_RECIPIENT_MAPPING=홍길동:hong@example.com, 김철수:kim@example.com
+
+# error-rag-mcp 전용 설정 (llm-agent RAG API, 위 API_* 와는 별도)
+RAG_API_BASE_URL=http://localhost:28000
+# 선택: 현재 llm-agent는 API Key 없이 접근 가능. 인증이 필요해지면 설정.
+RAG_API_BEARER_TOKEN=
+RAG_API_SSL_VERIFY=false
+RAG_COLLECTION_NAME=여기에_실제_콜렉션_ID_입력
+RAG_DOMAIN_ID=여기에_실제_도메인_ID_입력
 ```
 
 *참고: `EMAIL_RECIPIENT_MAPPING`을 설정하면 이메일 주소 대신 `홍길동` 같은 수신자 이름만 전달해도 자동으로 이메일 주소로 변환하여 발송합니다.*
 
-이제 VS Code의 `mcp.json`이나 클라이언트 설정 파일에서 `command` 경로를 `C:\mcp-server\.venv\Scripts\email-mcp.exe` 로 지정하여 사용하시면 됩니다!
+이제 VS Code의 `mcp.json`이나 클라이언트 설정 파일에서 `command` 경로를 서버별로 지정하여 사용하시면 됩니다
+(예: `C:\mcp-server\.venv\Scripts\email-mcp.exe`, `C:\mcp-server\.venv\Scripts\error-rag-mcp.exe`)!
 
 
 ---
